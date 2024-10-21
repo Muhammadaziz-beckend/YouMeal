@@ -22,7 +22,7 @@ class Product(Date_of_create_update):
     calories = models.PositiveIntegerField('сколько ккалории')
     price = models.PositiveIntegerField('Цена')
     category = models.ForeignKey('Category',models.CASCADE,'cat',verbose_name='Катигория')
-    # owner = models.ForeignKey('user')
+    product_composition = models.ManyToManyField('Product_composition','product_composition',verbose_name='Состав')
 
     class Meta:
         verbose_name = 'Продукт'

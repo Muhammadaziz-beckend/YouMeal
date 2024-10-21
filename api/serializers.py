@@ -1,5 +1,6 @@
 from  rest_framework import  serializers
 from main.models import *
+from orders.models import *
 
 class ProductListSerializer(serializers.ModelSerializer):
 
@@ -48,4 +49,22 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
         model = Category
         fields = [
             'name'
+        ]
+
+
+class OrdersListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class OrdersCreateSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = Order
+        fields = [
+            'product',  'user',  'count',
         ]

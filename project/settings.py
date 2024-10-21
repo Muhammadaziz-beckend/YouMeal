@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'account',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
 
     # install
     'rest_framework',
+    "rest_framework.authtoken",
     "corsheaders",
     'django_cleanup',
     'django_resized',
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     # apps
+
     'main',
     'orders',
 ]
@@ -124,6 +127,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = "account.User"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

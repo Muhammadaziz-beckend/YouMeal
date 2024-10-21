@@ -6,8 +6,10 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register('products',ProductViewSet)
 router.register('category',CategoryViewSet)
+router.register('orders',OrdersViewSet)
 
 urlpatterns = [
+    path('auth/',include('api.auth.urls')),
     path('',include(router.urls))
 ]
 

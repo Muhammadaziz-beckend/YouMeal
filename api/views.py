@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from .serializers import *
 from main.models import  *
+from orders.models import *
 from .mixin import UltraModelMixin
 from .paginators import PaginatorProduct
 
@@ -48,3 +49,19 @@ class CategoryViewSet(UltraModelMixin):
         'update': [IsAuthenticated | IsAdminUser]
     }
 
+
+class OrdersViewSet(UltraModelMixin):
+    queryset = Order.objects.all()
+    lookup_field = 'id'
+    serializer_classes = {
+        'list': OrdersListSerializer,
+        'retrieve': OrdersListSerializer,
+        'create': OrdersCreateSerializer,
+        'update': OrdersCreateSerializer
+    }
+    permission_classes_by_activ = {
+        'list': [AllowAny],
+        'retrieve': [AllowAny],
+        'create': [IsAuthenticated | IsAdminUser],
+        'update': [IsAuthenticated | IsAdminUser]
+    }
