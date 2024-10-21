@@ -6,15 +6,19 @@
 env/
 .venv/
 
-# Compiled python files
+# Скомпилированные файлы Python
 *.py[cod]
 *.so
 *.egg-info/
 
-# Django migrations
-# migrations/
+# Миграции Django
+migrations/
 
+# SQLite базы данных
 *.sqlite3
 
 # Логи
-*.logbeckend/db.sqlite3
+*.log
+
+# Исключение файлов, которые не должны быть в репозитории
+*.env
