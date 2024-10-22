@@ -152,8 +152,8 @@ class StatusSerializer(serializers.Serializer):
 class CancelOrderByClient:
     serializer_classes = {}
 
-    @swagger_auto_schema(request_body=StatusSerializer,
-                         responses={201: StatusSerializer(many=False), 400: 'Bad Request'})
+    # @swagger_auto_schema(request_body=StatusSerializer,
+    #                      responses={201: StatusSerializer(many=False), 400: 'Bad Request'})
     @permission_classes([IsAuthenticated, IsOwnerUser | IsAdminUser])
     @action(['POST'], False, 'cancel-order-by-client/(?P<pk>[^/.]+)')
     def cancel_order_by_client(self, request, pk, *args, **kwargs):
@@ -186,16 +186,12 @@ class CancelOrderByClient:
 
         queryset = get_object_or_404(Order,pk=pk)
 
-        print()
-
         if count := request.data.get('count'):
             queryset.count = count
 
         queryset.save()
 
         serializer = OrdersSerializer(queryset)
-
-        print(pk)
 
         return  Response(
             serializer.data

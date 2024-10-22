@@ -23,6 +23,7 @@ class Product(Date_of_create_update):
     price = models.PositiveIntegerField('Цена')
     category = models.ForeignKey('Category',models.CASCADE,'cat',verbose_name='Катигория')
     product_composition = models.ManyToManyField('Product_composition','product_composition',verbose_name='Состав')
+    is_publish = models.BooleanField('Продаётся',default=True)
 
     class Meta:
         verbose_name = 'Продукт'

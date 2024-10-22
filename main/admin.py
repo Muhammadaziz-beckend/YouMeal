@@ -9,9 +9,10 @@ class Product_compositionAdmin(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'calories', 'price', 'category']
+    list_display = ['id', 'name', 'calories', 'price', 'category','is_publish']
     list_display_links = ['id', 'name', 'calories', 'price', 'category']
     list_filter = ['category','product']
+    list_editable = ['is_publish']
     inlines = [Product_compositionAdmin]
 
 
