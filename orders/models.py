@@ -1,13 +1,18 @@
 from django.db import models
-from django.template.base import kwarg_re
-
 from account.models import User
 
+STATUS = (
+    'Pending',
+    'In Progress',
+    'Delivered',
+    'Cancelled',
+)
+
 class Order(models.Model):
-    PENDING = 'Pending' #
-    IN_PROGRESS = 'In Progress' #
-    DELIVERED = 'Delivered' #
-    CANCELLED = 'Cancelled' #
+    PENDING = 'Pending'  #
+    IN_PROGRESS = 'In Progress'  #
+    DELIVERED = 'Delivered'  #
+    CANCELLED = 'Cancelled'  #
 
     STATUS_CHOICES = [
         (PENDING, 'Ожидание'),

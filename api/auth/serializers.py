@@ -69,3 +69,4 @@ class ProfileUserSerializer(serializers.ModelSerializer):
             "email",
             "role",
         ]
+

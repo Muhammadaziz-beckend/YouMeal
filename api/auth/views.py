@@ -89,3 +89,5 @@ class RegisterAPIView(GenericAPIView):
         }
 
         return  Response(date,status.HTTP_201_CREATED)
+
+
