@@ -4,10 +4,10 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from orders.models import Order, STATUS
+from orders.models import Order, STATUS, PromotionalCode
 from account.models import User
 from api.auth.serializers import ProfileUserSerializer
-from .serializers import OrdersSerializer,OrderCreateSerializer
+from .serializers import OrdersSerializer,OrderCreateSerializer,PromotionalCodeCreateSerializer,PromotionalCodeSerializer
 from api.mixin import UltraModelMixin,A2UModelMixin
 from api.permissions import IsOwnerUser
 
@@ -32,3 +32,18 @@ class OrdersViewSet(A2UModelMixin):
         'update': [IsAuthenticated , IsOwnerUser | IsAdminUser]
     }
 
+class PromotionalCodeViewSet(UltraModelMixin):
+    queryset = PromotionalCode.objects.all()
+    lookup_field = 'id'
+    serializer_classes = {
+        'list': PromotionalCodeSerializer,
+        'retrieve': PromotionalCodeSerializer,
+        'create': PromotionalCodeCreateSerializer,
+        'update': PromotionalCodeCreateSerializer
+    }
+    permission_classes_by_activ = {
+        'list': [IsAuthenticated],
+        'retrieve': [IsAuthenticated],
+        'create': [IsAuthenticated, IsOwnerUser | IsAdminUser],
+        'update': [IsAuthenticated, IsOwnerUser | IsAdminUser]
+    }

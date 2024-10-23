@@ -11,6 +11,7 @@ from main.models import  *
 from orders.models import *
 from .mixin import UltraModelMixin
 from .paginators import PaginatorProduct
+from .filters import ProductFilter
 
 class ProductViewSet(UltraModelMixin):
     queryset = Product.objects.all()
@@ -22,6 +23,7 @@ class ProductViewSet(UltraModelMixin):
         'update':ProductCreteSerializer
     }
     filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    filterset_class = ProductFilter
     ordering = ["price", "name", "date_create",'weight','calories']
     search_fields = ['name','description','weight','calories','price']
     permission_classes_by_activ = {

@@ -44,6 +44,14 @@ class Product_composition(Date_of_create_update):
         return  self.name
 
 class Category(Date_of_create_update):
+    icon = ResizedImageField(
+        verbose_name='Иконка',
+        upload_to='icon/',
+        size=[24, 24],
+        quality=90,
+        force_format="WEBP",
+        null=True
+    )
     name = models.CharField('Названия',max_length=65)
 
     class Meta:

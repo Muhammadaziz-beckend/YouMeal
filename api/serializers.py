@@ -48,6 +48,7 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = [
+            'icon',
             'name'
         ]
 

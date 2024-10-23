@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     'django_cleanup',
+    'django_filters',
     'django_resized',
     "phonenumber_field",
     'drf_yasg',
