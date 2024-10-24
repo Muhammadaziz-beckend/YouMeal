@@ -1,25 +1,18 @@
-from django.core.serializers import serialize
 from django.core.validators import MinValueValidator
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
+from rest_framework import status
+from rest_framework.decorators import action, permission_classes
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import *
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action,permission_classes
+
 from account.models import User
-from api.auth.serializers import ProfileUserSerializer
-from api.permissions import IsOwnerUser
 from api.orders.serializers import OrdersSerializer
-from drf_yasg.utils import swagger_auto_schema
-
-from api.serializers import ProductListSerializer
-from rest_framework.mixins import  ListModelMixin
-from rest_framework.permissions import *
-
+from api.permissions import IsOwnerUser
 from orders.models import Order
-
 
 
 class MultipleDestroyMixinSerializer(serializers.Serializer):
@@ -152,8 +145,9 @@ class StatusSerializer(serializers.Serializer):
 class CancelOrderByClient:
     serializer_classes = {}
 
-    # @swagger_auto_schema(request_body=StatusSerializer,
-    #                      responses={201: StatusSerializer(many=False), 400: 'Bad Request'})
+    @swagger_auto_schema(request_body=StatusSerializer,
+                         operation_description="Отмена товара.",
+                         responses={201: StatusSerializer(many=False), 400: 'Bad Request'})
     @permission_classes([IsAuthenticated, IsOwnerUser | IsAdminUser])
     @action(['POST'], False, 'cancel-order-by-client/(?P<pk>[^/.]+)')
     def cancel_order_by_client(self, request, pk, *args, **kwargs):
@@ -179,6 +173,7 @@ class CancelOrderByClient:
         return Response(serializer.data)
 
     @swagger_auto_schema(request_body=CountSerializer,
+                         operation_description="Изменяет количество товара в заказе.",
         responses={201: CountSerializer(many=False), 400: 'Bad Request'})
     @permission_classes([IsAuthenticated , IsOwnerUser])
     @action(['POST'],False,'change-product-quantity/(?P<pk>[^/.]+)')

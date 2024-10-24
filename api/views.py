@@ -6,6 +6,7 @@ from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from .clone import clone
 from .serializers import *
 from main.models import  *
 from orders.models import *
@@ -33,6 +34,14 @@ class ProductViewSet(UltraModelMixin):
         'update': [IsAuthenticated | IsAdminUser]
     }
     pagination_class = PaginatorProduct
+
+    def retrieve(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # cloned_products = clone(product.id, 500)
+
+        serializer = self.get_serializer(product)
+        return Response(serializer.data)
 
 
 class CategoryViewSet(UltraModelMixin):
