@@ -16,7 +16,8 @@ from rest_framework.filters import  OrderingFilter
 
 class OrdersViewSet(A2UModelMixin):
     queryset = Order.objects.all()
-    lookup_field = 'id'
+    query = Order
+    lookup_field = 'pk'
     serializer_classes = {
         'list': OrdersSerializer,
         'retrieve':OrdersSerializer,

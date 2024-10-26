@@ -3,10 +3,12 @@ from rest_framework.generics import get_object_or_404
 from orders.models import Order,PromotionalCode
 from main.models import Product
 from account.models import User
+from  api.serializers import ProductListSerializer
 
 from rest_framework import serializers
 
 class OrdersSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer()
 
     class Meta:
         model = Order

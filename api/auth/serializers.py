@@ -3,14 +3,9 @@ from rest_framework import serializers
 
 from account.models import User
 
-# class UserSerializer(ModelSerializer):
-#
-#     class Meta:
-#         model = User
-#         fields = []
-
 
 class RegisterSerializer(ModelSerializer):
+    password = serializers.CharField()
 
     class Meta:
         model = User
@@ -18,7 +13,8 @@ class RegisterSerializer(ModelSerializer):
             'phone',
             'first_name',
             'last_name',
-            'email'
+            'email',
+            'password'
         ]
 
     def create(self, validated_data):
@@ -42,14 +38,9 @@ class UpdateSerializer(serializers.ModelSerializer):
             "first_name",
         ]
 
-class LoginSerializer(ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = [
-            'phone',
-            'password'
-        ]
+class LoginSerializer(Serializer):
+    phone = serializers.CharField()
+    password = serializers.CharField()
 
 class ChangPasswordSerializer(Serializer):
     old_password = serializers.CharField()
@@ -70,3 +61,14 @@ class ProfileUserSerializer(serializers.ModelSerializer):
             "role",
         ]
 
+class ProfileUserUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "get_full_name",
+            "last_name",
+            "first_name",
+            "email",
+            "role",
+        ]

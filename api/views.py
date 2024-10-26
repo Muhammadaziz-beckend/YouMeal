@@ -24,9 +24,9 @@ class ProductViewSet(UltraModelMixin):
         'update':ProductCreteSerializer
     }
     filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    search_fields = ['name','description','weight','calories','price']
     filterset_class = ProductFilter
     ordering = ["price", "name", "date_create",'weight','calories']
-    search_fields = ['name','description','weight','calories','price']
     permission_classes_by_activ = {
         'list': [AllowAny],
         'retrieve': [AllowAny],
@@ -35,13 +35,13 @@ class ProductViewSet(UltraModelMixin):
     }
     pagination_class = PaginatorProduct
 
-    def retrieve(self, request, *args, **kwargs):
-        product = self.get_object()
-
-        # cloned_products = clone(product.id, 500)
-
-        serializer = self.get_serializer(product)
-        return Response(serializer.data)
+    # def retrieve(self, request, *args, **kwargs):
+    #     product = self.get_object()
+    #
+    #     # cloned_products = clone(product.id, 500)
+    #
+    #     serializer = self.get_serializer(product)
+    #     return Response(serializer.data)
 
 
 class CategoryViewSet(UltraModelMixin):

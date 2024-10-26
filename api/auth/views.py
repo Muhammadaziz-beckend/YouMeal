@@ -3,29 +3,34 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
-from api.mixin import UltraModelMixin
-from rest_framework.generics import GenericAPIView
+from api.mixin import UltraModelMixin,UserModelMixin
+from rest_framework.generics import GenericAPIView, get_object_or_404
 from rest_framework.permissions import *
 from .serializers import *
+from ..permissions import IsOwnerUser
 
-class ProfileViewSet(UltraModelMixin):
+
+class ProfileViewSet(UserModelMixin):
     queryset = User.objects.all()
-    lookup_field = 'id'
+    query = User
+    http_method_names = ['get', 'put', 'patch', 'delete']
     serializer_classes = {
         'list': ProfileUserSerializer,
         'retrieve': ProfileUserSerializer,
         'create': ProfileUserSerializer,
-        'update': ProfileUserSerializer
+        'update': ProfileUserUpdateSerializer,
+        'destroy':ProfileUserUpdateSerializer
     }
     permission_classes_by_activ = {
-        'list': [AllowAny],
-        'retrieve': [AllowAny],
+        'list': [IsAuthenticated],
+        'retrieve': [IsAuthenticated],
         'create': [IsAuthenticated | IsAdminUser],
-        'update': [IsAuthenticated | IsAdminUser]
+        'update': [IsAuthenticated , IsOwnerUser | IsAdminUser],
+        'destroy':[IsAuthenticated , IsOwnerUser | IsAdminUser]
     }
 
 class LoginAPIView(GenericAPIView):
-    queryset = Token.objects.all()
+    queryset = Token.objects
     serializer_class = LoginSerializer
 
     def post(self,request,*args,**kwargs):
@@ -51,6 +56,8 @@ class LoginAPIView(GenericAPIView):
             }
 
             return Response(date)
+
+        print(user,'-------')
 
         return Response(
             {"detail": "Пользователь не существует или пароль неверен"},
@@ -81,10 +88,10 @@ class RegisterAPIView(GenericAPIView):
 
         token = Token.objects.get_or_create(user=user)[0].key
 
-        read_serializer = ProfileUserSerializer(instance=user)
+        read_serializer = ProfileUserSerializer(user)
 
         date = {
-            **read_serializer,
+            **read_serializer.data,
             "token":token
         }
 

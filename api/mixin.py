@@ -1,4 +1,5 @@
 from django.core.validators import MinValueValidator
+from django.db.models.fields import return_None
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework import status
@@ -10,8 +11,10 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from account.models import User
+from api.carts.serializers import CartSerializer
 from api.orders.serializers import OrdersSerializer
 from api.permissions import IsOwnerUser
+from carts.models import Cart
 from orders.models import Order
 
 
@@ -125,7 +128,7 @@ class GetPostAllAccessoriesMixin:
             return {}
 
 class CountSerializer(serializers.Serializer):
-    count = serializers.IntegerField()
+    count_product = serializers.IntegerField()
 
 class StatusSerializer(serializers.Serializer):
     PENDING = 'Pending'  # Ожидание
@@ -142,7 +145,7 @@ class StatusSerializer(serializers.Serializer):
 
     status = serializers.ChoiceField(choices=STATUS_CHOICES)
 
-class CancelOrderByClient:
+class CancelCardByClient:
     serializer_classes = {}
 
     @swagger_auto_schema(request_body=StatusSerializer,
@@ -172,24 +175,40 @@ class CancelOrderByClient:
 
         return Response(serializer.data)
 
-    @swagger_auto_schema(request_body=CountSerializer,
-                         operation_description="Изменяет количество товара в заказе.",
-        responses={201: CountSerializer(many=False), 400: 'Bad Request'})
-    @permission_classes([IsAuthenticated , IsOwnerUser])
-    @action(['POST'],False,'change-product-quantity/(?P<pk>[^/.]+)')
-    def change_product_quantity(self,request,pk,*args,**kwargs):
+    @swagger_auto_schema(
+        request_body=CountSerializer,
+        operation_description="Изменяет количество товара в заказе.",
+        responses={201: CountSerializer(many=False), 400: 'Bad Request'}
+    )
+    @permission_classes([IsAuthenticated, IsOwnerUser])
+    @action(methods=['POST'], detail=False, url_path='change-product-quantity/(?P<pk>[^/.]+)')
+    def change_product_quantity(self, request, pk, *args, **kwargs):
+        # Получение объекта корзины по pk
+        queryset = get_object_or_404(self.get_queryset(), pk=pk)
 
-        queryset = get_object_or_404(Order,pk=pk)
+        # Проверка и обновление количества товара
+        count = request.data.get('count_product')
+        if count is not None:
+            try:
+                count = int(count)
+                if count < 1:
+                    raise ValidationError("Количество товара должно быть больше 0.")
+            except ValueError:
+                raise ValidationError("Количество товара должно быть числом.")
 
-        if count := request.data.get('count'):
-            queryset.count = count
+            queryset.count_product = count
 
-        queryset.save()
+            queryset.final_tootle_prise =  queryset.count_product * queryset.product.price
+            queryset.save()
 
-        serializer = OrdersSerializer(queryset)
+            # Сериализация обновленного объекта и возврат ответа
+            serializer = CartSerializer(queryset)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return  Response(
-            serializer.data
+        # Если параметр count не передан
+        return Response(
+            {"detail": "Параметр 'count' обязателен."},
+            status=status.HTTP_400_BAD_REQUEST
         )
 
     @action(['GET'],False,'get-all-status')
@@ -202,19 +221,119 @@ class CancelOrderByClient:
             'CANCELLED' : 'Отменен'
         })
 
-class UltraModelMixin(
-    GetAllItemsMixin,
+class UserOwnerMixin:
+
+    def list(self, request, *args, **kwargs):
+        user_request = request.user
+
+        user = get_object_or_404(User, phone=user_request.phone)
+
+        serializer = self.get_serializer(user)
+        print(serializer.data)
+        return Response(serializer.data)
+
+class UserOwnerDestroyMixin:
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        print(kwargs)
+        user_request = request.user
+        print(user_request)
+        queryset = get_object_or_404(self.query, pk=pk)
+        print(queryset)
+
+        if not (queryset == user_request or request.user.is_superuser):
+            return Response({
+                'default': 'Вы не имеете доступ'
+
+            }, status.HTTP_403_FORBIDDEN)
+
+        return super().destroy(request, *args, **kwargs)
+
+class UserOwnerDestroyListMixin(UserOwnerDestroyMixin,UserOwnerMixin):
+    ...
+
+
+class UserOwnerCartsMixin:
+
+    def list(self, request, *args, **kwargs):
+        user_request = request.user
+
+        carts = self.queryset.filter(user=user_request)
+
+        final_prise = sum(item.final_tootle_prise for item in carts)
+
+        serializer = self.get_serializer(carts, many=True)
+
+        data = {
+            'carts': serializer.data,
+            'final_prise': final_prise
+        }
+
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        user_id = serializer.validated_data['user']
+        product_pk = serializer.validated_data['product']
+        count_product = serializer.validated_data['count_product']
+
+        arr = list(self.get_queryset().filter(product=product_pk,user=user_id))
+        if len(arr) > 0:
+            cart, *carts = arr
+            if len(carts) > 0:
+                for i in carts:
+                    cart.count_product += i.count_product
+                    i.delete()
+
+            cart.count_product += count_product
+            cart.save()
+
+            reade_serializer = self.get_serializer(cart)
+
+            return Response(reade_serializer.data,status.HTTP_201_CREATED)
+        else:
+            return super().create(request,*args,**kwargs)
+
+
+
+
+class BaseModelMixin(
     SerializerByActive,
     PermissionByAction,
+):
+    ...
+
+class CartsModelMixin(
+    BaseModelMixin,
+    CancelCardByClient,
+    UserOwnerDestroyMixin,
+    UserOwnerCartsMixin,
+    ModelViewSet,
+):
+    ...
+
+class UltraModelMixin(
+    BaseModelMixin,
+    GetAllItemsMixin,
     ModelViewSet
 ): ...
 
 class A2UModelMixin(
+    BaseModelMixin,
+    UserOwnerDestroyListMixin,
     MultipleDestroyMixin,
-    CancelOrderByClient,
     GetPostAllAccessoriesMixin,
     GetAllItemsMixin,
-    SerializerByActive,
-    PermissionByAction,
+    ModelViewSet
+): ...
+
+
+class UserModelMixin(
+    BaseModelMixin,
+    UserOwnerMixin,
     ModelViewSet
 ): ...

@@ -10,6 +10,7 @@ router.register('orders',OrdersViewSet)
 
 urlpatterns = [
     path('auth/',include('api.auth.urls')),
+    path('',include('api.carts.urls')),
     path('',include('api.orders.urls')),
     path('',include(router.urls))
 ]
