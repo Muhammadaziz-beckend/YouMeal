@@ -34,13 +34,13 @@ class Order(models.Model):
 
     cart = models.ManyToManyField('carts.Cart', related_name='orders', verbose_name='Карзинка')
     user = models.ForeignKey(User, models.CASCADE, related_name='orders', verbose_name='Пользователь')
-    address = models.ForeignKey('Address', models.CASCADE, 'order', verbose_name='Адрес', null=True)
+    address = models.ForeignKey('Address', models.SET_NULL, 'order', verbose_name='Адрес', null=True)
     type_order = models.CharField('Тип заказа', max_length=15, choices=TYPE_ORDER, default=Delivery)
     status = models.CharField(max_length=20, verbose_name='Статус заказа', choices=STATUS_CHOICES, default=PENDING)
     total_price = models.DecimalField('Общяя сумма', max_digits=10, decimal_places=2, default=0.0)
     date_create = models.DateField('Дата добавления', auto_now_add=True)
     date_update = models.DateField('Дата обнавления', auto_now=True)
-    promo_code = models.ForeignKey('PromotionalCode', models.CASCADE, 'promo_code', verbose_name='Промокод', blank=True, null=True)
+    promo_code = models.ForeignKey('PromotionalCode', models.SET_NULL, 'promo_code', verbose_name='Промокод', blank=True, null=True)
 
     def final_prise_is_have_promo_code(self):
         self.promo_code: PromotionalCode

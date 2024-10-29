@@ -42,7 +42,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         if promo_code_name:
             try:
-                promo_code_instance = PromotionalCode.objects.get(code=promo_code_name)
+                promo_code_instance = PromotionalCode.objects.get(code=promo_code_name,is_active=True)
             except PromotionalCode.DoesNotExist:
                 raise serializers.ValidationError("Промокод не существует.")
 
