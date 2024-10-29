@@ -4,20 +4,22 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from orders.models import Order, STATUS, PromotionalCode
+from orders.models import Order, STATUS, PromotionalCode, Address
 from account.models import User
 from api.auth.serializers import ProfileUserSerializer
-from .serializers import OrdersSerializer,OrderCreateSerializer,PromotionalCodeCreateSerializer,PromotionalCodeSerializer
-from api.mixin import UltraModelMixin,A2UModelMixin
+from .serializers import OrdersSerializer, OrderCreateSerializer, PromotionalCodeCreateSerializer, \
+    PromotionalCodeSerializer, AddressSerializer
+from api.mixin import UltraModelMixin, A2UModelMixin, UserOwnerDestroyListMixin, GetAllAddressIsOwnerMixin
 from api.permissions import IsOwnerUser
 
 from rest_framework.permissions import *
 from rest_framework.filters import  OrderingFilter
 
-class OrdersViewSet(A2UModelMixin):
+class OrdersViewSet(UserOwnerDestroyListMixin,A2UModelMixin):
     queryset = Order.objects.all()
     query = Order
-    lookup_field = 'pk'
+    user_get_all_items = True
+    lookup_field = 'id'
     serializer_classes = {
         'list': OrdersSerializer,
         'retrieve':OrdersSerializer,
@@ -48,3 +50,22 @@ class PromotionalCodeViewSet(UltraModelMixin):
         'create': [IsAuthenticated, IsOwnerUser | IsAdminUser],
         'update': [IsAuthenticated, IsOwnerUser | IsAdminUser]
     }
+
+
+class AddressViewSet(GetAllAddressIsOwnerMixin,A2UModelMixin):
+    queryset = Address.objects.all()
+    user_items = True
+    lookup_field = 'id'
+    serializer_classes = {
+        'list': AddressSerializer,
+        'retrieve': AddressSerializer,
+        'create': AddressSerializer,
+        'update': AddressSerializer
+    }
+    permission_classes_by_activ = {
+        'list': [IsAuthenticated],
+        'retrieve': [IsAuthenticated],
+        'create': [IsAuthenticated, IsOwnerUser | IsAdminUser],
+        'update': [IsAuthenticated, IsOwnerUser | IsAdminUser]
+    }
+

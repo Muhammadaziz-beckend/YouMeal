@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     # apps
 
     'main',
-    'orders',
+    'orders.apps.OrdersConfig',
     'carts',
 ]
 

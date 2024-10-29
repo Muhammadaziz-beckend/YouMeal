@@ -10,7 +10,8 @@ class CartAdmin(admin.ModelAdmin):
         'product',
         'user',
         'count_product',
-        'final_tootle_prise'
+        'final_tootle_prise',
+        'is_see_user'
     ]
 
     list_display_links = [
@@ -21,5 +22,6 @@ class CartAdmin(admin.ModelAdmin):
         'final_tootle_prise'
     ]
 
+    list_editable = ['is_see_user']
     readonly_fields = ['final_tootle_prise']
     search_fields = ['product','user','count_product']

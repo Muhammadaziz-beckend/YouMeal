@@ -1,12 +1,20 @@
-from  rest_framework import  serializers
+from rest_framework import  serializers
+
 from main.models import *
 from orders.models import *
 
+class ProductCompositionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product_composition
+        fields = '__all__'
+
 class ProductListSerializer(serializers.ModelSerializer):
+    product_composition = ProductCompositionSerializer(many=True)
 
     class Meta:
         model = Product
-        exclude = ['description']
+        exclude = ['date_update']
 
 class ProductCreteSerializer(serializers.ModelSerializer):
 
@@ -59,7 +67,7 @@ class OrdersListSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
 
-
+from account.models import  User
 class OrdersCreateSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())

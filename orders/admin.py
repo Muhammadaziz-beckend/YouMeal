@@ -1,15 +1,14 @@
 from django.contrib import admin
-from .models import Order, PromotionalCode
+from .models import Order, PromotionalCode, Address
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'product',
         'user',
-        'count',
         'status',
+        'type_order',
         'total_price',
         'promo_code',
         'date_create',
@@ -18,10 +17,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display_links = [
         'id',
-        'product',
         'user',
-        'count',
         'status',
+        'type_order',
         'total_price',
         'promo_code',
         'date_create',
@@ -29,17 +27,17 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     readonly_fields = [
-        'total_price','status',
+        'total_price','status','cart'
     ]
 
     search_fields = ['user__phone', 'status', 'date_create', 'date_update']
 
-    list_filter = ['status','promo_code']
+    list_filter = ['status','promo_code','type_order']
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return []
-        return ['total_price', 'status']
+            return ['cart']
+        return ['total_price', 'status','cart']
 
 
 @admin.register(PromotionalCode)
@@ -72,3 +70,31 @@ class PromotionalCodeAdmin(admin.ModelAdmin):
         'data_end',
     ]
     list_filter = ['discount_type']
+
+
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'user',
+        'street',
+        'house_number',
+        'apartment',
+        'floor',
+        'intercom',
+        'create_data',
+    ]
+
+    list_display_links = [
+        'id',
+        'user',
+        'street',
+        'house_number',
+        'apartment',
+        'floor',
+        'intercom',
+        'create_data',
+    ]
+
+    list_filter = ['user']
+    search_fields = ['user__phone','street','house_number']

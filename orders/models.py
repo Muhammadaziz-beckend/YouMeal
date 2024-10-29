@@ -1,5 +1,5 @@
-from datetime import datetime
-
+from math import trunc
+from django.db import transaction
 from django.db import models
 from account.models import User
 
@@ -9,12 +9,13 @@ STATUS = (
     'Delivered',
     'Cancelled',
 )
+from django.db.models import F, Sum
 
 class Order(models.Model):
-    PENDING = 'Pending'  #
-    IN_PROGRESS = 'In Progress'  #
-    DELIVERED = 'Delivered'  #
-    CANCELLED = 'Cancelled'  #
+    PENDING = 'Pending'
+    IN_PROGRESS = 'In Progress'
+    DELIVERED = 'Delivered'
+    CANCELLED = 'Cancelled'
 
     STATUS_CHOICES = [
         (PENDING, 'Ожидание'),
@@ -23,32 +24,26 @@ class Order(models.Model):
         (CANCELLED, 'Отменен'),
     ]
 
-    product = models.ForeignKey('main.Product',models.CASCADE,related_name='orders',verbose_name='Продукт')
-    user = models.ForeignKey(User,models.CASCADE,related_name='orders',verbose_name='Пользователь')
-    count = models.PositiveIntegerField('Количество продукта',)
-    status = models.CharField(max_length=20,verbose_name='Статус заказа', choices=STATUS_CHOICES,default=PENDING)
-    total_price = models.DecimalField('Общяя сумма',max_digits=10, decimal_places=2,default=0.0)
-    date_create = models.DateField('Дата добавления',auto_now_add=True)
-    date_update = models.DateField('Дата обнавления',auto_now=True)
-    promo_code = models.ForeignKey('PromotionalCode',models.CASCADE,'promo_code',verbose_name='Промокод' ,blank=True,null=True)
+    Pickup = 'Pickup'
+    Delivery = 'Delivery'
 
-    class Meta:
-        verbose_name = 'Заказ'
-        verbose_name_plural = 'Заказы'
+    TYPE_ORDER = [
+        (Pickup, 'Самовывоз'),
+        (Delivery, 'Доставка')
+    ]
 
-    def save(
-        self,
-        *args,
-        **kwargs
-    ):
-        self.total_price = self.product.price * self.count
-        self.total_price = self.final_prise_is_have_promo_code()
-
-        return super().save( *args,
-        **kwargs)
+    cart = models.ManyToManyField('carts.Cart', related_name='orders', verbose_name='Карзинка')
+    user = models.ForeignKey(User, models.CASCADE, related_name='orders', verbose_name='Пользователь')
+    address = models.ForeignKey('Address', models.CASCADE, 'order', verbose_name='Адрес', null=True)
+    type_order = models.CharField('Тип заказа', max_length=15, choices=TYPE_ORDER, default=Delivery)
+    status = models.CharField(max_length=20, verbose_name='Статус заказа', choices=STATUS_CHOICES, default=PENDING)
+    total_price = models.DecimalField('Общяя сумма', max_digits=10, decimal_places=2, default=0.0)
+    date_create = models.DateField('Дата добавления', auto_now_add=True)
+    date_update = models.DateField('Дата обнавления', auto_now=True)
+    promo_code = models.ForeignKey('PromotionalCode', models.CASCADE, 'promo_code', verbose_name='Промокод', blank=True, null=True)
 
     def final_prise_is_have_promo_code(self):
-        self.promo_code:PromotionalCode
+        self.promo_code: PromotionalCode
         if self.promo_code and self.promo_code.is_active:
             if self.promo_code.discount_type == 'percentage':
                 total_minus_prise = (self.total_price * self.promo_code.subtraction_from_the_amount) / 100
@@ -57,12 +52,16 @@ class Order(models.Model):
 
             final_prise = self.total_price - total_minus_prise
 
-            return  max(final_prise,0)
+            return max(final_prise, 0)
 
-        return  self.total_price
+        return self.total_price
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
 
     def __str__(self):
-        return  f'{self.pk} {self.status}'
+        return f'{self.pk} {self.status}'
 
 from django.utils import timezone
 
@@ -87,3 +86,20 @@ class PromotionalCode(models.Model):
 
     def __str__(self):
         return  self.code
+
+
+class Address(models.Model):
+    user = models.ForeignKey(User,models.CASCADE,'address',verbose_name="Пользователь")
+    street = models.CharField('Улица',max_length=35,null=True)
+    house_number = models.CharField('Дом',max_length=10,null=True)
+    apartment = models.CharField('Квартира',null=True,blank=True,max_length=10)
+    floor = models.PositiveIntegerField('Этаж',null=True,blank=True,)
+    intercom = models.CharField('Дамафон',null=True,blank=True,max_length=10)
+    create_data = models.DateTimeField('Дата создания',auto_now_add=True,null=True)
+
+    def __str__(self):
+        return f"{self.street}, дом {self.house_number}, кв. {self.apartment} ({self.user.get_full_name})"
+
+    class Meta:
+        verbose_name = 'Адрес'
+        verbose_name_plural = 'Адреса'

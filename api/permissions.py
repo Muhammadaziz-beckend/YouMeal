@@ -29,5 +29,4 @@ class IsIdEUser(permissions.BasePermission):
         data = request.data.get('user')
 
         user = get_object_or_404(User,phone=user_request.phone)
-
         return user.id == data

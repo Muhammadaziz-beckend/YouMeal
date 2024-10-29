@@ -57,8 +57,6 @@ class LoginAPIView(GenericAPIView):
 
             return Response(date)
 
-        print(user,'-------')
-
         return Response(
             {"detail": "Пользователь не существует или пароль неверен"},
             status.HTTP_401_UNAUTHORIZED,

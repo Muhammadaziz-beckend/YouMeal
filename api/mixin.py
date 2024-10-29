@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db.models.fields import return_None
 from drf_yasg.utils import swagger_auto_schema
+from referencing import Resource
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.decorators import action, permission_classes
@@ -76,11 +77,19 @@ class PermissionByAction:
 
 class GetAllItemsMixin:
     serializer_classes = {}
+    user_items = False
 
+    permission = [IsAuthenticated] if user_items else []
+
+    @permission_classes([*permission])
     @action(["GET"], False, "all-items")
     def get_all_items(self, request):
-
         queryset = self.get_queryset()
+        print(self.user_items)
+        if self.user_items:
+            queryset = queryset.filter(user__phone=request.user.phone)
+        else:
+            ...
         serializer = self.serializer_classes.get('list')(queryset, many=True)
 
         return Response(serializer.data)
@@ -222,6 +231,7 @@ class CancelCardByClient:
         })
 
 class UserOwnerMixin:
+    user_get_all_items = False
 
     def list(self, request, *args, **kwargs):
         user_request = request.user
@@ -229,16 +239,20 @@ class UserOwnerMixin:
         user = get_object_or_404(User, phone=user_request.phone)
 
         serializer = self.get_serializer(user)
-        print(serializer.data)
+
+        if self.user_get_all_items:
+            queryset = self.get_queryset().filter(user__phone=user.phone)
+            serializer = self.get_serializer(queryset , many=True)
+
         return Response(serializer.data)
 
 class UserOwnerDestroyMixin:
     def destroy(self, request, *args, **kwargs):
-        pk = kwargs.get('pk')
+        pk = kwargs.get('id')
         print(kwargs)
         user_request = request.user
         print(user_request)
-        queryset = get_object_or_404(self.query, pk=pk)
+        queryset = get_object_or_404(self.get_queryset(), pk=pk)
         print(queryset)
 
         if not (queryset == user_request or request.user.is_superuser):
@@ -249,8 +263,7 @@ class UserOwnerDestroyMixin:
 
         return super().destroy(request, *args, **kwargs)
 
-class UserOwnerDestroyListMixin(UserOwnerDestroyMixin,UserOwnerMixin):
-    ...
+
 
 
 class UserOwnerCartsMixin:
@@ -299,7 +312,36 @@ class UserOwnerCartsMixin:
             return super().create(request,*args,**kwargs)
 
 
+class GetAllAddressIsOwnerMixin:
 
+    def list(self, request, *args, **kwargs):
+        user_request = request.user
+        queryset = self.get_queryset().filter(user__phone=user_request.phone)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+    @permission_classes([IsAuthenticated | IsAdminUser])
+    @action(['GET'],False,'get-last-add-address')
+    def get_last_add_address(self,request,*args,**kwargs):
+        user_request = request.user
+        queryset = self.get_queryset().filter(user=user_request).order_by('-create_data')
+
+        last_address = queryset.first()
+
+        if last_address is None:
+            return Response({"detail": "Адрес не найден."}, status=404)
+
+        print(last_address)
+
+        serializer =  self.serializer_classes.get('retrieve')(last_address)
+
+        return Response(serializer.data)
+
+
+class UserOwnerDestroyListMixin(UserOwnerDestroyMixin,UserOwnerMixin):
+    ...
 
 class BaseModelMixin(
     SerializerByActive,
@@ -324,7 +366,6 @@ class UltraModelMixin(
 
 class A2UModelMixin(
     BaseModelMixin,
-    UserOwnerDestroyListMixin,
     MultipleDestroyMixin,
     GetPostAllAccessoriesMixin,
     GetAllItemsMixin,

@@ -1,6 +1,6 @@
 from rest_framework.generics import get_object_or_404
 
-from orders.models import Order,PromotionalCode
+from orders.models import Order, PromotionalCode, Address
 from main.models import Product
 from account.models import User
 from  api.serializers import ProductListSerializer
@@ -8,50 +8,49 @@ from  api.serializers import ProductListSerializer
 from rest_framework import serializers
 
 class OrdersSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer()
 
     class Meta:
         model = Order
         fields = [
             'id',
-            'product',
             'user',
-            'count',
+            'address',
+            'type_order',
             'status',
             'total_price',
             'promo_code',
+            'cart'
         ]
 
-
 class OrderCreateSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all())
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     promo_code = serializers.CharField(required=False)
 
     class Meta:
         model = Order
         fields = [
-            'product',
             'user',
-            'count',
-            'promo_code'
+            'address',
+            'type_order',
+            'promo_code',
         ]
 
     def save(self, **kwargs):
-        # Получаем промокод из данных
         promo_code_name = self.validated_data.pop('promo_code', None)
-        promo_code_instance = None  # Переменная для хранения экземпляра промокода
+        promo_code_instance = None
 
         if promo_code_name:
-            # Ищем промокод по названию
             try:
                 promo_code_instance = PromotionalCode.objects.get(code=promo_code_name)
             except PromotionalCode.DoesNotExist:
                 raise serializers.ValidationError("Промокод не существует.")
 
-        # Создаем заказ с актуальными данными
+        # Создаем заказ
         order = Order.objects.create(promo_code=promo_code_instance, **self.validated_data)
         return order
+
+
 
 
 class PromotionalCodeSerializer(serializers.ModelSerializer):
@@ -73,3 +72,9 @@ class PromotionalCodeCreateSerializer(serializers.ModelSerializer):
             'data_end',
             'is_active'
         ]
+
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = '__all__'
