@@ -18,7 +18,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display_links = [
         'id',
         'user',
-        'status',
+        # 'status',
         'type_order',
         'total_price',
         'promo_code',
@@ -29,6 +29,8 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = [
         'total_price','status','cart'
     ]
+
+    list_editable = ['status',]
 
     search_fields = ['user__phone', 'status', 'date_create', 'date_update']
 

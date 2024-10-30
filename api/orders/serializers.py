@@ -4,10 +4,12 @@ from orders.models import Order, PromotionalCode, Address
 from main.models import Product
 from account.models import User
 from  api.serializers import ProductListSerializer
+from ..carts.serializers import *
 
 from rest_framework import serializers
 
 class OrdersSerializer(serializers.ModelSerializer):
+    cart = CartSerializer(many=True)
 
     class Meta:
         model = Order

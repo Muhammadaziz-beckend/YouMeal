@@ -346,35 +346,32 @@ class UserOwnerDestroyListMixin(UserOwnerDestroyMixin,UserOwnerMixin):
 class BaseModelMixin(
     SerializerByActive,
     PermissionByAction,
-):
-    ...
-
-class CartsModelMixin(
-    BaseModelMixin,
-    CancelCardByClient,
-    UserOwnerDestroyMixin,
-    UserOwnerCartsMixin,
     ModelViewSet,
 ):
     ...
 
-class UltraModelMixin(
+class CartsModelMixin(
+    CancelCardByClient,
+    UserOwnerDestroyMixin,
+    UserOwnerCartsMixin,
     BaseModelMixin,
+):
+    ...
+
+class UltraModelMixin(
     GetAllItemsMixin,
-    ModelViewSet
+    BaseModelMixin,
 ): ...
 
 class A2UModelMixin(
-    BaseModelMixin,
     MultipleDestroyMixin,
     GetPostAllAccessoriesMixin,
     GetAllItemsMixin,
-    ModelViewSet
+    BaseModelMixin,
 ): ...
 
 
 class UserModelMixin(
-    BaseModelMixin,
     UserOwnerMixin,
-    ModelViewSet
+    BaseModelMixin,
 ): ...

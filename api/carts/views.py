@@ -23,7 +23,7 @@ class CardsViewSet(CartsModelMixin):
     permission_classes_by_activ = {
         'list': [IsAuthenticated],
         'retrieve': [IsAuthenticated],
-        'create': [IsAuthenticated, IsIdEUser],
+        'create': [IsAuthenticated, IsAdminUser],
         'update': [IsAuthenticated, IsOwnerUser | IsAdminUser],
         'destroy': [IsAuthenticated, IsOwnerCard | IsAdminUser],
     }
