@@ -14,7 +14,6 @@ class BaseOrderViewSet(GetAllObjUser, BaseModelMixin):
     http_method_names = ['get', ]
     serializer_class = OrdersSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = PaginatorProduct
 
 class OrdersViewSet(BaseOrderViewSet):
     queryset = Order.objects.all().exclude(status__in=[Order.DELIVERED, Order.CANCELLED])

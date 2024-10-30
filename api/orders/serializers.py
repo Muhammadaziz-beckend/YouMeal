@@ -8,8 +8,15 @@ from ..carts.serializers import *
 
 from rest_framework import serializers
 
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = '__all__'
+        
 class OrdersSerializer(serializers.ModelSerializer):
     cart = CartSerializer(many=True)
+    address = AddressSerializer()
 
     class Meta:
         model = Order
@@ -21,7 +28,8 @@ class OrdersSerializer(serializers.ModelSerializer):
             'status',
             'total_price',
             'promo_code',
-            'cart'
+            'cart',
+            'date_create'
         ]
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -75,8 +83,3 @@ class PromotionalCodeCreateSerializer(serializers.ModelSerializer):
             'is_active'
         ]
 
-class AddressSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Address
-        fields = '__all__'
