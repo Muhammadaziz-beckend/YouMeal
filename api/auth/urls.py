@@ -6,9 +6,9 @@ router = DefaultRouter()
 router.register('profile',ProfileViewSet)
 
 urlpatterns = [
-    # ChangPassword
     path('register/',RegisterAPIView.as_view()),
     path('login/',LoginAPIView.as_view()),
     path('chang-password/',ChangPassword.as_view()),
+    path('logout/', LogoutApiView.as_view()),
     path('',include(router.urls))
 ]

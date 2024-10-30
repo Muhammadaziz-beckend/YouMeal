@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate,logout
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -122,3 +122,22 @@ class ChangPassword(GenericAPIView):
         return Response(
             {"detail": "Неверный старый пароль"}, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class LogoutApiView(GenericAPIView):
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Проверка, что пользователь аутентифицирован
+        if user:
+            logout(request)
+            # Удаление токена пользователя
+            Token.objects.filter(user=user).delete()
+
+            return Response({"detail": "Вы успешно вышли из системы."}, status=status.HTTP_200_OK)
+
+        # Сообщение об ошибке, если пользователь не аутентифицирован
+        return Response({"detail": "Пользователь не аутентифицирован."}, status=status.HTTP_400_BAD_REQUEST)
