@@ -96,3 +96,29 @@ class RegisterAPIView(GenericAPIView):
         return  Response(date,status.HTTP_201_CREATED)
 
 
+class ChangPassword(GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = ChengPasswordSerializer
+
+    def post(self,request,*args,**kwargs):
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_password = serializer.validated_data.get("new_password")
+        old_password = serializer.validated_data.get("old_password")
+
+        user = request.user
+
+        if user.check_password(old_password):
+
+            if not user.check_password(new_password):
+                user.set_password(new_password)
+                user.save()
+
+                return  Response({'default':'Пароль успешно изменён'})
+
+            return Response({'detail':'Пароль должен отличатся от старога'},status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "Неверный старый пароль"}, status=status.HTTP_400_BAD_REQUEST
+        )

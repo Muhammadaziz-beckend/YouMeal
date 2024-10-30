@@ -70,5 +70,8 @@ class ProfileUserUpdateSerializer(serializers.ModelSerializer):
             "last_name",
             "first_name",
             "email",
-            "role",
         ]
+
+class ChengPasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField()
