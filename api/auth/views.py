@@ -133,10 +133,10 @@ class LogoutApiView(GenericAPIView):
 
         # Проверка, что пользователь аутентифицирован
         if user:
-            logout(request)
+
             # Удаление токена пользователя
             Token.objects.filter(user=user).delete()
-
+            logout(request)
             return Response({"detail": "Вы успешно вышли из системы."}, status=status.HTTP_200_OK)
 
         # Сообщение об ошибке, если пользователь не аутентифицирован
