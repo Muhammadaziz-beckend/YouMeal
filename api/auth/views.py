@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate,logout
+from django.contrib.auth import authenticate,logout,login
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -47,6 +47,8 @@ class LoginAPIView(GenericAPIView):
             reade_serializer = ProfileUserSerializer(
                 instance=user, context={"request": request}
             )
+
+            login(request,user)
 
             token = self.get_queryset().get_or_create(user=user)[0].key
 
