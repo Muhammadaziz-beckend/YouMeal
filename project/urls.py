@@ -23,8 +23,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',lambda r: redirect('admin/')),
     path('api/v1/',include('api.urls')),
+    path('', lambda r: redirect('admin/')),
 ]
 
 if settings.DEBUG:
