@@ -86,6 +86,8 @@ class RegisterAPIView(GenericAPIView):
 
         user = serializer.save()
 
+        login(request,user)
+
         token = Token.objects.get_or_create(user=user)[0].key
 
         read_serializer = ProfileUserSerializer(user)
