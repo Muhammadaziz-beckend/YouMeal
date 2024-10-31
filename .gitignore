@@ -16,7 +16,7 @@ migrations/
 
 
 # SQLite базы данных
-*.sqlite3
+# *.sqlite3
 
 # Логи
 *.log
